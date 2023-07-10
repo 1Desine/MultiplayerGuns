@@ -64,9 +64,7 @@ public class Player : NetworkBehaviour {
     }
     private void SpawnGun() {
         GameObject gun = gunsSO.GetGun().gameObject;
-        GameObject gunSpawned = Instantiate(gun, gunHoldPosition);
-        gunSpawned.GetComponent<NetworkObject>().Spawn(true);
+        Instantiate(gun, gunHoldPosition);
     }
-
 
 }

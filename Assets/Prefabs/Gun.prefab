@@ -527,7 +527,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1195043436154459817}
   - component: {fileID: 8474523225389647044}
-  - component: {fileID: 3093277727594753675}
+  - component: {fileID: -7466040389329118581}
   m_Layer: 0
   m_Name: Gun
   m_TagString: Untagged
@@ -569,7 +569,7 @@ MonoBehaviour:
   barrelEndPoint: {fileID: 7959463610740881860}
   hitMarker: {fileID: 7896672910317220462, guid: 58d6ba16fd4403a409293b28a6937c8e,
     type: 3}
---- !u!114 &3093277727594753675
+--- !u!114 &-7466040389329118581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

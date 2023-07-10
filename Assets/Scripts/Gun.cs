@@ -80,21 +80,18 @@ public class Gun : NetworkBehaviour {
     }
 
 
-
-    private IEnumerator DespawnHitMarker(GameObject hitMarker) {
-        yield return new WaitForSeconds(10);
-        Destroy(hitMarker);
-    }
-
-
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void SpawnHitMarkerServerRpc(Vector3 position) {
         NetworkObject hitMarkerSpawned = Instantiate(hitMarker);
         hitMarkerSpawned.transform.position = position;
         hitMarkerSpawned.Spawn(true);
 
-
-        //StartCoroutine(DespawnHitMarker(hitMarkerSpawned));
+        StartCoroutine(DespawnHitMarker(hitMarkerSpawned));
+    }
+    private IEnumerator DespawnHitMarker(NetworkObject hitMarkerSpawned) {
+        yield return new WaitForSeconds(5);
+        Destroy(hitMarkerSpawned);
+        hitMarkerSpawned.Despawn();
     }
 
 
