@@ -5,17 +5,29 @@ using UnityEngine;
 
 public class PlayerUI : MonoBehaviour {
 
-    [SerializeField] private Player player;
     [SerializeField] private TextMeshProUGUI AmmoLeftText;
     [SerializeField] private TextMeshProUGUI AmmoMaxText;
 
+    [SerializeField] private GunControllerSO gunControllerSO;
 
 
-
-    private void Update() {
-        AmmoLeftText.text = player.GetGunAmmoCurrent().ToString();
-        AmmoMaxText.text = player.GetGunAmmoMax().ToString();
+    private void OnEnable() {
+        Gun.OnAmmoChanged += Gun_OnAmmoChanged;
+        Gun.OnAmmoMaxChanged += Gun_OnAmmoMaxChanged;
     }
+    private void OnDisable() {
+        Gun.OnAmmoChanged -= Gun_OnAmmoChanged;
+        Gun.OnAmmoMaxChanged -= Gun_OnAmmoMaxChanged;
+    }
+
+
+    private void Gun_OnAmmoChanged(int obj) {
+        AmmoLeftText.text = obj.ToString();
+    }
+    private void Gun_OnAmmoMaxChanged(int obj) {
+        AmmoMaxText.text = obj.ToString();
+    }
+
 
 
 

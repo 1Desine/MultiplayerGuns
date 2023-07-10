@@ -11,14 +11,18 @@ public class GameInput : MonoBehaviour {
 
 
 
-
     private void Awake() {
         playerInputActions = new PlayerInputActions();
         playerInputActions.Enable();
-
     }
 
 
+    public bool ShootKey() {
+        return playerInputActions.Player.Shoot.IsPressed();
+    }
+    public bool ReloadKey() {
+        return playerInputActions.Player.Reload.IsPressed();
+    }
 
     public Vector2 GetLookDelta() {
         return playerInputActions.Player.Look.ReadValue<Vector2>();

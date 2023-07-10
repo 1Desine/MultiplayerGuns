@@ -3,7 +3,10 @@ guid: 36dd4ef8cd996604992e6f1f2b919c4e
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - AmmoLeftText: {instanceID: 0}
+  - AmmoMaxText: {instanceID: 0}
+  - gunControllerSO: {fileID: 11400000, guid: 5e97638a3b1b2a244a5c16d72a4bf1b3, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -1,12 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class Gun : MonoBehaviour {
+public class Gun : NetworkBehaviour {
 
-    [SerializeField] private Transform BarrelEndPoint;
-    [SerializeField] private GameObject HitMarker;
+    [SerializeField] private GunControllerSO gunControllerSO;
+
+    [SerializeField] private Transform barrelEndPoint;
+    [SerializeField] private NetworkObject hitMarker;
+
+    public static event Action<int> OnAmmoChanged;
+    public static event Action<int> OnAmmoMaxChanged;
 
 
     protected float fireRate = 600f;
@@ -18,28 +26,31 @@ public class Gun : MonoBehaviour {
     private bool canShootNextShell { get { return timeSinceLastShot > 60 / fireRate; } }
 
 
+    private void Awake() {
+        // Reseting gunController
+        gunControllerSO.shoot = false;
+        gunControllerSO.reload = false;
+
+        // Reseting UI
+        OnAmmoChanged?.Invoke(clipAmmo);
+        OnAmmoMaxChanged?.Invoke(clipSize);
+    }
+
 
     private void Update() {
-        HandleShooting();
-        HandleReloading();
+        if(gunControllerSO.shoot) TryShoot();
+        if(gunControllerSO.reload) TryReload();
 
         timeSinceLastShot += Time.deltaTime;
     }
 
 
 
-    private void HandleShooting() {
-        if(Input.GetMouseButton(0)) {
-            // Player want to Shoot
-            if(CanShoot()) {
-                Shoot();
-            }
-        }
-    }
     private bool CanShoot() {
         return shellIsLoaded && canShootNextShell;
     }
-    private void Shoot() {
+    private void TryShoot() {
+        if(CanShoot() == false) return;
         timeSinceLastShot = 0;
 
         if(clipAmmo > 0) {
@@ -49,38 +60,41 @@ public class Gun : MonoBehaviour {
         }
 
         float shootDistance = 500;
-        if(Physics.Raycast(BarrelEndPoint.position, BarrelEndPoint.forward, out RaycastHit hit, shootDistance)) {
-            GameObject hitMarker = Instantiate(HitMarker, null);
-            hitMarker.transform.position = hit.point;
-            StartCoroutine(DeleteHitMarker(hitMarker));
+        if(Physics.Raycast(barrelEndPoint.position, barrelEndPoint.forward, out RaycastHit hit, shootDistance)) {
+            SpawnHitMarkerServerRpc(hit.point);
+            Debug.DrawRay(barrelEndPoint.position, barrelEndPoint.forward * (hit.point - barrelEndPoint.position).magnitude, Color.red, 0.05f);
         }
-        Debug.DrawRay(BarrelEndPoint.position, BarrelEndPoint.forward * 2, Color.red, 0.1f);
+
+        OnAmmoChanged?.Invoke(clipAmmo);
+
+    }
+    private void TryReload() {
+        clipAmmo = clipSize;
+
+        if(shellIsLoaded == false) {
+            clipAmmo--;
+            shellIsLoaded = true;
+        }
+
+        OnAmmoChanged?.Invoke(clipAmmo);
     }
 
-    private IEnumerator DeleteHitMarker(GameObject hitMarker) {
+
+
+    private IEnumerator DespawnHitMarker(GameObject hitMarker) {
         yield return new WaitForSeconds(10);
         Destroy(hitMarker);
     }
 
-    private void HandleReloading() {
-        if(Input.GetKeyDown(KeyCode.R)) {
-            // Player want to Reload
-            clipAmmo = clipSize;
 
-            if(shellIsLoaded == false) {
-                clipAmmo--;
-                shellIsLoaded = true;
-            }
+    [ServerRpc]
+    private void SpawnHitMarkerServerRpc(Vector3 position) {
+        NetworkObject hitMarkerSpawned = Instantiate(hitMarker);
+        hitMarkerSpawned.transform.position = position;
+        hitMarkerSpawned.Spawn(true);
 
-            Debug.Log("Reload - currentAmmoInClip = " + clipAmmo);
-        }
-    }
 
-    public int GetAmmoCurrent() {
-        return clipAmmo;
-    }
-    public int GetAmmoMax() {
-        return clipSize;
+        //StartCoroutine(DespawnHitMarker(hitMarkerSpawned));
     }
 
 
